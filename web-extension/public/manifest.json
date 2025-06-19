@@ -1,0 +1,19 @@
+{
+  "name": "Browser Brain",
+  "description": "sample description",
+  "version": "1.0",
+  "manifest_version": 3,
+  "action": {
+    "default_popup": "src/popup/options.html"
+  },
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["src/content.js"]
+    }
+  ],
+  "permissions": ["storage", "scripting", "activeTab"]
+}
