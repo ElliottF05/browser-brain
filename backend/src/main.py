@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv(".env")
+
 from fastapi import FastAPI
 import uvicorn
 
@@ -8,8 +11,6 @@ app = FastAPI()
 
 # include the api router in the app
 app.include_router(router)
-
-# import the routes from the api module
 
 # run the app with uvicorn
 if __name__ == "__main__":
