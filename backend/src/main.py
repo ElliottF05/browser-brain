@@ -4,7 +4,7 @@ from config.config import settings
 from fastapi import FastAPI
 import uvicorn
 
-from api.routes import router
+from fast_api.routes import router
 
 # create the global fastapi app
 app = FastAPI()

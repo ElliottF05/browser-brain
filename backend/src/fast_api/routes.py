@@ -1,7 +1,7 @@
 from fastapi import APIRouter, BackgroundTasks
 
-from api.models import PageUpload
-from ai.services import embed_uploaded_page
+from fast_api.models import PageUpload
+from fast_api.services import process_uploaded_page
 
 # create the router that will expose all api endpoints
 router = APIRouter()
@@ -13,7 +13,6 @@ async def root():
 
 # endpoint to upload a page
 @router.post("/pages/upload")
-async def upload_page(page: PageUpload, background_tasks: BackgroundTasks):
-    # run the embedding task in the background
-    background_tasks.add_task(embed_uploaded_page, page.content)
+def upload_page(page: PageUpload):
+    process_uploaded_page(page)
     return {"message": "Page received successfully."}
