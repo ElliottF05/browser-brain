@@ -1,8 +1,8 @@
-import os
-
 from openai import AsyncOpenAI
 
-client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+from config.config import settings
+
+client = AsyncOpenAI(api_key=settings.openai_api_key)
 
 async def embed_uploaded_page(content: list[str]):
     text = "\n".join(content)

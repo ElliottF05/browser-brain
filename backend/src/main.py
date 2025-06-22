@@ -1,5 +1,5 @@
-from dotenv import load_dotenv
-load_dotenv(".env")
+# must import config before importing any other modules
+from config.config import settings
 
 from fastapi import FastAPI
 import uvicorn
