@@ -2,18 +2,15 @@ from fastapi import APIRouter
 
 from api.models import PageUpload
 
-# add routes to the global fastpi app
-def get_router() -> APIRouter:
+# create the router that will expose all api endpoints
+router = APIRouter()
 
-    router = APIRouter()
+# basic health test
+@router.get("/")
+async def root():
+    return {"message": "Welcome to Browser Brain's backend!"}
 
-    @router.get("/")
-    async def root():
-        return {"message": "Welcome to Browser Brain's backend!"}
-    
-    @router.post("/pages/upload")
-    async def upload_page(page: PageUpload):
-        return {"message": "Page uploaded successfully!"}
-
-
-    return router
+# endpoint to upload a page
+@router.post("/pages/upload")
+async def upload_page(page: PageUpload):
+    return {"message": "Page uploaded successfully!"}

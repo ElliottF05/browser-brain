@@ -1,15 +1,15 @@
 from fastapi import FastAPI
 import uvicorn
 
-from api.routes import get_router
+from api.routes import router
 
-# create and set up the global fastapi app instance
-def create_app() -> FastAPI:
-    app = FastAPI()
-    app.include_router(get_router())
+# create the global fastapi app
+app = FastAPI()
 
-    return app
-app = create_app()
+# include the api router in the app
+app.include_router(router)
+
+# import the routes from the api module
 
 # run the app with uvicorn
 if __name__ == "__main__":
