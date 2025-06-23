@@ -63,6 +63,36 @@ def get_chunk_embedding_from_str(chunk: str) -> list[float]:
     
     return response.data[0].embedding
 
+def query_llm(query: str, context: list[str]) -> str:
+    context_block = "\n\n".join(context)
 
+    response = client.chat.completions.create(
+        model="gpt-4.1-mini",
+        messages=[
+            {
+                "role": "system",
+                "content": (
+                    "You are a memory assistant that helps the user find and recall information "
+                    "from their past web browsing history. You will be given relevant raw context extracted "
+                    "from previously visited pages. Use this context to answer the user's question as accurately as possible."
+                    "\n\n"
+                    "If you don't find the answer in the provided context, you should respond: "
+                    "“I couldn't find anything in your browsing history that directly answers your question.”"
+                )
+            },
+            {
+                "role": "user",
+                "content": (
+                    f"Here is your browsing history context:\n\n{context_block}\n\n"
+                    f"Now answer the following question:\n{query}"
+                )
+            }
+        ],
+        max_tokens=1000,
+    )
 
+    if response.choices[0].message.content:
+        return response.choices[0].message.content.strip()
+    else:
+        raise ValueError("No content in response from LLM")
 

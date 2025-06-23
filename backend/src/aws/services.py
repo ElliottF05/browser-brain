@@ -1,3 +1,5 @@
+from concurrent.futures import ThreadPoolExecutor
+
 import boto3
 
 from fast_api.models import Chunk
@@ -17,3 +19,17 @@ def upload_chunk(chunk: Chunk):
         Key=f"chunks/{chunk.chunk_id}",
         Body=chunk.content.encode('utf-8'),
     )
+
+def download_chunk(chunk_id: str) -> str:
+    s3_client = session.client('s3')
+    response = s3_client.get_object(
+        Bucket=settings.aws_s3_bucket,
+        Key=f"chunks/{chunk_id}",
+    )
+    return response['Body'].read().decode('utf-8')
+
+def download_chunks_parallel(chunk_ids: list[str]) -> list[str]:
+    with ThreadPoolExecutor() as executor:
+        futures = [executor.submit(download_chunk, chunk_id) for chunk_id in chunk_ids]
+        chunks = [future.result() for future in futures]
+    return chunks
