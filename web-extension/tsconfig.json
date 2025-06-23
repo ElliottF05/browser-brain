@@ -2,6 +2,10 @@
     "extends": "@tsconfig/vite-react/tsconfig.json",
     "compilerOptions": {
         // ...existing options...
-        "types": ["chrome"]
+        "types": ["chrome"],
+        "baseUrl": ".",
+        "paths": {
+            "@/*": ["./src/*"]
+        }
     }
 }
