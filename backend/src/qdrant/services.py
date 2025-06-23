@@ -15,7 +15,7 @@ from config.config import settings
     # PUT collections/chunks/index 
     # {
     #   "field_name": "user_id",
-    #   "field_schema": "uuid"
+    #   "field_schema": "keyword"
     # }
 
     # PUT collections/chunks/index 
@@ -44,3 +44,21 @@ def upload_chunk(chunk: Chunk):
             )
         ],
     )
+
+def query_chunks(embedding: list[float], user_id: str, limit: int = 10) -> list[str]:
+    search_result = qdrant_client.search(
+        collection_name="chunks",
+        query_vector=embedding,
+        query_filter=models.Filter(
+            must=[
+                models.FieldCondition(
+                    key="user_id",
+                    match=models.MatchValue(value=user_id)
+                )
+            ]
+        ),
+        limit=limit
+    )
+
+    chunk_ids = [str(point.id) for point in search_result]
+    return chunk_ids

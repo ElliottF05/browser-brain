@@ -47,10 +47,22 @@ def chunk_text(content: list[str], chunk_size: int = 8191) -> tuple[list[list[in
     return chunks, strings
 
 
-def get_chunk_embedding(tokens: list[int]) -> list[float]:
+def get_chunk_embedding_from_tokens(tokens: list[int]) -> list[float]:
     response = client.embeddings.create(
         input=tokens,
         model="text-embedding-3-small",
     )
     
     return response.data[0].embedding
+
+def get_chunk_embedding_from_str(chunk: str) -> list[float]:
+    response = client.embeddings.create(
+        input=chunk,
+        model="text-embedding-3-small",
+    )
+    
+    return response.data[0].embedding
+
+
+
+

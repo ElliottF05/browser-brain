@@ -6,7 +6,7 @@ import time
 import ai.services
 import aws.services
 import qdrant.services
-from fast_api.models import Chunk, PageUpload
+from fast_api.models import Chunk, PageUpload, Query
 
 # service to orchestrate the entire process of handing an uploaded page
 def process_uploaded_page(page: PageUpload):
@@ -21,7 +21,7 @@ def process_uploaded_page(page: PageUpload):
     # this is used to parallelize the network io processing of chunks
     def process_chunk(tokens: list[int], text: str):
         # get the embedding
-        embedding = ai.services.get_chunk_embedding(tokens)
+        embedding = ai.services.get_chunk_embedding_from_tokens(tokens)
 
         # create a chunk object
         chunk = Chunk(
@@ -47,4 +47,15 @@ def process_uploaded_page(page: PageUpload):
             future.result()  # raises exceptions if any
 
     print(f"Successfully processed page ({len(futures)} chunks)")
+
+
+def process_query(query: Query):
+    # get the embedding for the query
+    embedding = ai.services.get_chunk_embedding_from_str(query.content)
+
+    # query qdrant for similar chunks
+    results = qdrant.services.query_chunks(embedding, query.user_id)
+
+    print(f"Query returned {len(results)} results")
+    return results
 

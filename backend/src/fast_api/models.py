@@ -12,3 +12,7 @@ class Chunk(BaseModel):
     chunk_id: str
     user_id: str
     timestamp: datetime
+
+class Query(BaseModel):
+    content: str
+    user_id: str

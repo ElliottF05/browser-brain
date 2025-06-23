@@ -1,7 +1,7 @@
 from fastapi import APIRouter, BackgroundTasks
 
-from fast_api.models import PageUpload
-from fast_api.services import process_uploaded_page
+from fast_api.models import PageUpload, Query
+from fast_api.services import process_query, process_uploaded_page
 
 # create the router that will expose all api endpoints
 router = APIRouter()
@@ -16,3 +16,9 @@ async def root():
 def upload_page(page: PageUpload):
     process_uploaded_page(page)
     return {"message": "Page received successfully."}
+
+# endpoint to query llm
+@router.post("/chat/query")
+def query_llm(query: Query):
+    response = process_query(query)
+    return {"response": response}
