@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { use, useState } from "react";
 
 const LlmQueryBox: React.FC = () => {
     const [query, setQuery] = useState("");
@@ -10,12 +10,24 @@ const LlmQueryBox: React.FC = () => {
         setLoading(true);
         setResponse(null);
         
-        // TODO: Replace this with your actual LLM API call
-        // Simulate async response
-        setTimeout(() => {
-            setResponse(`LLM response for: "${query}"`);
+        try {
+            const res = await fetch("http://127.0.0.1:8000/chat/query", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ 
+                    content: query,
+                    user_id: "user123" // TODO: replace with actual user ID
+                })
+            });
+            const data = await res.json();
+            setResponse(data.response);
+        } catch (error) {
+            console.error("Error:", error);
+        } finally {
             setLoading(false);
-        }, 1000);
+        }
     };
     
     return (
