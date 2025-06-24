@@ -1,4 +1,11 @@
+from typing import Iterable
+
 from openai import OpenAI
+from openai.types.chat import (
+    ChatCompletionMessageParam, 
+    ChatCompletionUserMessageParam, 
+    ChatCompletionSystemMessageParam
+)
 import tiktoken
 
 from config.config import settings
@@ -30,12 +37,12 @@ def chunk_text(content: list[str], chunk_size: int = 8191) -> tuple[list[list[in
             current_chunk = []
             current_length = 0
 
-            strings.append("".join(current_string))
+            strings.append("\n".join(current_string))
             current_string = []
         
         if len(tokenized) > chunk_size:
-            print("ERROR: Element exceeds chunk size limit, skipping element.")
-            continue
+            print("WARNING: Element exceeds chunk size limit, truncating.")
+            tokenized = tokenized[:chunk_size]
 
         current_chunk.extend(tokenized)
         current_length += len(tokenized)
@@ -43,7 +50,7 @@ def chunk_text(content: list[str], chunk_size: int = 8191) -> tuple[list[list[in
 
     if current_chunk:
         chunks.append(current_chunk)
-        strings.append("".join(current_string))
+        strings.append("\n".join(current_string))
     return chunks, strings
 
 
@@ -52,7 +59,6 @@ def get_chunk_embedding_from_tokens(tokens: list[int]) -> list[float]:
         input=tokens,
         model="text-embedding-3-small",
     )
-    
     return response.data[0].embedding
 
 def get_chunk_embedding_from_str(chunk: str) -> list[float]:
@@ -60,35 +66,67 @@ def get_chunk_embedding_from_str(chunk: str) -> list[float]:
         input=chunk,
         model="text-embedding-3-small",
     )
-    
     return response.data[0].embedding
 
-def query_llm(query: str, context: list[str]) -> str:
-    context_block = "\n\n".join(context)
+def create_query_prompt_messages(context: list[str], query: str) -> Iterable[ChatCompletionMessageParam]:
+    start_page_msg = "### START NEXT PAGE CONTENT \n\n ###"
+    end_page_msg = "### \n\n END PREVIOUS PAGE CONTENT ###"
+    separator = f"{end_page_msg}\n\n\n{start_page_msg}"
+    context_block = start_page_msg + separator.join(context) + end_page_msg
 
-    response = client.chat.completions.create(
-        model="gpt-4.1-mini",
-        messages=[
-            {
-                "role": "system",
-                "content": (
-                    "You are a memory assistant that helps the user find and recall information "
+    messages = [
+        ChatCompletionSystemMessageParam(
+            role="system",
+            content=(
+                "You are a memory assistant that helps the user find and recall information "
                     "from their past web browsing history. You will be given relevant raw context extracted "
                     "from previously visited pages. Use this context to answer the user's question as accurately as possible."
                     "\n\n"
                     "If you don't find the answer in the provided context, you should respond: "
                     "“I couldn't find anything in your browsing history that directly answers your question.”"
-                )
-            },
-            {
-                "role": "user",
-                "content": (
-                    f"Here is your browsing history context:\n\n{context_block}\n\n"
-                    f"Now answer the following question:\n{query}"
-                )
-            }
-        ],
-        max_tokens=1000,
+            )
+        ),
+        ChatCompletionUserMessageParam(
+            role="user",
+            content=(
+                f"Here is your browsing history context:\n\n{context_block}\n\n"
+                f"Now answer the following question:\n{query}"
+            )
+        )
+    ]
+    return messages
+
+def query_llm(query: str, context: list[str], max_tokens: int = 500) -> str:
+    messages = create_query_prompt_messages(context, query)
+    response = client.chat.completions.create(
+        model="gpt-4.1-mini",
+        messages=messages,
+        max_tokens=max_tokens,
+    )
+
+    if response.choices[0].message.content:
+        return response.choices[0].message.content.strip()
+    else:
+        raise ValueError("No content in response from LLM")
+    
+def query_llm_streaming(query: str, context: list[str], max_tokens: int = 500) -> Iterable[str]:
+    messages = create_query_prompt_messages(context, query)
+    response = client.chat.completions.create(
+        model="gpt-4.1-mini",
+        messages=messages,
+        max_tokens=max_tokens,
+        stream=True,
+    )
+
+    for chunk in response:
+        if chunk.choices[0].delta.content:
+            yield chunk.choices[0].delta.content
+
+def get_response(messages: Iterable[ChatCompletionMessageParam], max_tokens: int = 500) -> str:
+    response = client.chat.completions.create(
+        model="gpt-4.1-mini",
+        messages=messages,
+        max_tokens=max_tokens,
     )
 
     if response.choices[0].message.content:
@@ -96,3 +134,14 @@ def query_llm(query: str, context: list[str]) -> str:
     else:
         raise ValueError("No content in response from LLM")
 
+def get_response_streaming(messages: Iterable[ChatCompletionMessageParam], max_tokens: int = 500) -> Iterable[str]:
+    response = client.chat.completions.create(
+        model="gpt-4.1-mini",
+        messages=messages,
+        max_tokens=max_tokens,
+        stream=True,
+    )
+
+    for chunk in response:
+        if chunk.choices[0].delta.content:
+            yield chunk.choices[0].delta.content

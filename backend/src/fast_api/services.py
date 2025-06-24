@@ -65,3 +65,19 @@ def process_query(query: Query):
     print(f"LLM response returned. Used {len(results)} results")
     return llm_response
 
+def process_query_streaming(query: Query):
+    # get the embedding for the query
+    embedding = ai.services.get_chunk_embedding_from_str(query.content)
+
+    # query qdrant for similar chunks
+    chunk_ids = qdrant.services.query_chunks(embedding, query.user_id)
+
+    # download the chunks from s3
+    results = aws.services.download_chunks_parallel(chunk_ids)
+
+    # use chunks as context for the query
+    llm_response = ai.services.query_llm_streaming(query.content, results)
+
+    print(f"Streaming LLM response. Used {len(results)} results")
+    return llm_response
+

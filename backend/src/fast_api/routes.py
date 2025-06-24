@@ -1,7 +1,8 @@
 from fastapi import APIRouter, BackgroundTasks
+from fastapi.responses import StreamingResponse
 
 from fast_api.models import PageUpload, Query
-from fast_api.services import process_query, process_uploaded_page
+from fast_api.services import process_query, process_query_streaming, process_uploaded_page
 
 # create the router that will expose all api endpoints
 router = APIRouter()
@@ -22,3 +23,10 @@ def upload_page(page: PageUpload):
 def query_llm(query: Query):
     response = process_query(query)
     return {"response": response}
+
+@router.post("/chat/query/stream")
+def query_llm_streaming(query: Query):
+    return StreamingResponse(
+        process_query_streaming(query),
+        media_type="text/event-stream",
+    )
