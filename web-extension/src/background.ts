@@ -4,7 +4,7 @@ import { SEND_TEXT_CHUNK, PAGE_UNLOAD, type ContentToBackgroundMessage } from '.
 // ----- STATE MANAGEMENT -----
 
 // store text for each tab, use a set for deduplication
-const tabData = new Map<number, { seenTextSet: Set<string>, seenTextList: string[], lastUrl: string }>();
+const tabData = new Map<number, { seenTextSet: Set<string>, seenTextList: string[], opened_ts: number }>();
 
 
 // ----- MESSAGE PROCESSING -----
@@ -13,7 +13,7 @@ const tabData = new Map<number, { seenTextSet: Set<string>, seenTextList: string
 function processTextChunksReceived(tabId: number, text: string) {
     console.log("Received text chunk in background from tab", tabId);
     if (!tabData.has(tabId)) {
-        tabData.set(tabId, { seenTextSet: new Set(), seenTextList: [], lastUrl: '' });
+        tabData.set(tabId, { seenTextSet: new Set(), seenTextList: [], opened_ts: Date.now() });
     }
     const data = tabData.get(tabId)!;
     if (!data.seenTextSet.has(text)) {
@@ -26,6 +26,14 @@ async function processPageUnload(tabId: number, url: string) {
     const data = tabData.get(tabId);
     if (!data) {
         console.warn(`No data found for tab ${tabId} on unload, returning early.`);
+        return;
+    }
+    if (data.seenTextList.length === 0) {
+        console.log(`No text data collected for tab ${tabId}, skipping upload.`);
+        return;
+    }
+    if (Date.now() - data.opened_ts < 5000) {
+        console.warn(`Tab ${tabId} was opened less than 5 seconds ago, skipping upload.`);
         return;
     }
 
