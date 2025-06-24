@@ -10,6 +10,7 @@ class Chunk(BaseModel):
     content: str
     embedding: list[float]
     chunk_id: str
+    url: str
     user_id: str
     timestamp: datetime
 

@@ -28,6 +28,7 @@ def process_uploaded_page(page: PageUpload):
             content=text,
             embedding=embedding,
             chunk_id=str(uuid.uuid4()),
+            url=page.url,
             user_id=page.user_id,
             timestamp=datetime.now(timezone.utc),
         )
@@ -54,15 +55,15 @@ def process_query(query: Query):
     embedding = ai.services.get_chunk_embedding_from_str(query.content)
 
     # query qdrant for similar chunks
-    chunk_ids = qdrant.services.query_chunks(embedding, query.user_id)
+    chunk_ids, chunk_urls = qdrant.services.query_chunks(embedding, query.user_id)
 
     # download the chunks from s3
-    results = aws.services.download_chunks_parallel(chunk_ids)
+    chunk_contents = aws.services.download_chunks_parallel(chunk_ids)
 
     # use chunks as context for the query
-    llm_response = ai.services.query_llm(query.content, results)
+    llm_response = ai.services.query_llm(query.content, chunk_contents, chunk_urls)
 
-    print(f"LLM response returned. Used {len(results)} results")
+    print(f"LLM response returned. Used {len(chunk_contents)} results")
     return llm_response
 
 def process_query_streaming(query: Query):
@@ -70,14 +71,14 @@ def process_query_streaming(query: Query):
     embedding = ai.services.get_chunk_embedding_from_str(query.content)
 
     # query qdrant for similar chunks
-    chunk_ids = qdrant.services.query_chunks(embedding, query.user_id)
+    chunk_ids, chunk_urls = qdrant.services.query_chunks(embedding, query.user_id)
 
     # download the chunks from s3
-    results = aws.services.download_chunks_parallel(chunk_ids)
+    chunk_contents = aws.services.download_chunks_parallel(chunk_ids)
 
     # use chunks as context for the query
-    llm_response = ai.services.query_llm_streaming(query.content, results)
+    llm_response = ai.services.query_llm_streaming(query.content, chunk_contents, chunk_urls)
 
-    print(f"Streaming LLM response. Used {len(results)} results")
+    print(f"Streaming LLM response. Used {len(chunk_contents)} results")
     return llm_response
 

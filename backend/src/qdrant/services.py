@@ -39,13 +39,15 @@ def upload_chunk(chunk: Chunk):
                 payload={
                     "content": chunk.content,
                     "user_id": chunk.user_id,
+                    "url": chunk.url,
                     "timestamp": chunk.timestamp.isoformat(timespec="minutes").replace("+00:00", "Z")
                 },
             )
         ],
     )
 
-def query_chunks(embedding: list[float], user_id: str, limit: int = 10) -> list[str]:
+# returns a tuple of (chunk_ids, url's)
+def query_chunks(embedding: list[float], user_id: str, limit: int = 10) -> tuple[list[str], list[str]]:
     search_result = qdrant_client.search(
         collection_name="chunks",
         query_vector=embedding,
@@ -61,4 +63,5 @@ def query_chunks(embedding: list[float], user_id: str, limit: int = 10) -> list[
     )
 
     chunk_ids = [str(point.id) for point in search_result]
-    return chunk_ids
+    chunk_urls = [point.payload["url"] if point.payload else "No URL available" for point in search_result]
+    return chunk_ids, chunk_urls

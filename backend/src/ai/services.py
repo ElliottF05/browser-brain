@@ -68,11 +68,18 @@ def get_chunk_embedding_from_str(chunk: str) -> list[float]:
     )
     return response.data[0].embedding
 
-def create_query_prompt_messages(context: list[str], query: str) -> Iterable[ChatCompletionMessageParam]:
-    start_page_msg = "### START NEXT PAGE CONTENT \n\n ###"
-    end_page_msg = "### \n\n END PREVIOUS PAGE CONTENT ###"
-    separator = f"{end_page_msg}\n\n\n{start_page_msg}"
-    context_block = start_page_msg + separator.join(context) + end_page_msg
+def create_query_prompt_messages(
+        chunk_contents: list[str], 
+        chunk_urls: list[str], 
+        query: str
+) -> Iterable[ChatCompletionMessageParam]:
+
+    blocks = []
+    for content, url in zip(chunk_contents, chunk_urls):
+        blocks.append(
+            f"### START NEXT PAGE CONTENT\nURL: {url}\n\n{content}\n### END PREVIOUS PAGE CONTENT ###"
+        )
+    context_block = "\n\n".join(blocks)
 
     messages = [
         ChatCompletionSystemMessageParam(
@@ -96,8 +103,8 @@ def create_query_prompt_messages(context: list[str], query: str) -> Iterable[Cha
     ]
     return messages
 
-def query_llm(query: str, context: list[str], max_tokens: int = 500) -> str:
-    messages = create_query_prompt_messages(context, query)
+def query_llm(query: str, chunk_contents: list[str], chunk_urls: list[str], max_tokens: int = 500) -> str:
+    messages = create_query_prompt_messages(chunk_contents, chunk_urls, query)
     response = client.chat.completions.create(
         model="gpt-4.1-mini",
         messages=messages,
@@ -109,8 +116,8 @@ def query_llm(query: str, context: list[str], max_tokens: int = 500) -> str:
     else:
         raise ValueError("No content in response from LLM")
     
-def query_llm_streaming(query: str, context: list[str], max_tokens: int = 500) -> Iterable[str]:
-    messages = create_query_prompt_messages(context, query)
+def query_llm_streaming(query: str, chunk_contents: list[str], chunk_urls: list[str], max_tokens: int = 500) -> Iterable[str]:
+    messages = create_query_prompt_messages(chunk_contents, chunk_urls, query)
     response = client.chat.completions.create(
         model="gpt-4.1-mini",
         messages=messages,
