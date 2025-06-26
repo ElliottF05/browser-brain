@@ -77,7 +77,7 @@ def create_query_prompt_messages(
     blocks = []
     for content, url in zip(chunk_contents, chunk_urls):
         blocks.append(
-            f"### START NEXT PAGE CONTENT\nURL: {url}\n\n{content}\n### END PREVIOUS PAGE CONTENT ###"
+            f"# ---START NEXT PAGE CONTENT---\nURL: {url}\n\n{content}\n# ---END PREVIOUS PAGE CONTENT---"
         )
     context_block = "\n\n".join(blocks)
 
