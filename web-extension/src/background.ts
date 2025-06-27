@@ -1,3 +1,5 @@
+import { LRUCache } from 'lru-cache';
+
 import { SEND_TEXT_CHUNK, PAGE_UNLOAD, type ContentToBackgroundMessage } from './types';
 
 
@@ -5,6 +7,11 @@ import { SEND_TEXT_CHUNK, PAGE_UNLOAD, type ContentToBackgroundMessage } from '.
 
 // store text for each tab, use a set for deduplication
 const tabData = new Map<number, { seenTextSet: Set<string>, seenTextList: string[], opened_ts: number }>();
+const globalSet = new LRUCache<string, string>({
+    max: 10000, // maximum number of unique text chunks to store globally
+    maxSize: 5000 * 1024, // maximum size of the cache, 5mb
+    sizeCalculation: (value) => value.length, // size is based on string length
+});
 
 
 // ----- MESSAGE PROCESSING -----
@@ -12,6 +19,11 @@ const tabData = new Map<number, { seenTextSet: Set<string>, seenTextList: string
 // helper function to process received text chunks
 function processTextChunksReceived(tabId: number, text: string) {
     console.log("Received text chunk in background from tab", tabId);
+    if (globalSet.has(text)) {
+        console.log("Text chunk already seen globally, skipping:", text);
+        return;
+    }
+    globalSet.set(text, text); // add to global set to avoid duplicates
     if (!tabData.has(tabId)) {
         tabData.set(tabId, { seenTextSet: new Set(), seenTextList: [], opened_ts: Date.now() });
     }
