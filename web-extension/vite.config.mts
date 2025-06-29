@@ -4,8 +4,7 @@ import { crx } from '@crxjs/vite-plugin';
 import manifest from './public/manifest.json';
 import tailwindcss from '@tailwindcss/vite';
 import tsconfigPaths from "vite-tsconfig-paths";
-import { dirname, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { resolve } from 'node:path'
 
 export default defineConfig({
   plugins: [
