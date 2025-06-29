@@ -1,6 +1,6 @@
 import "@/styles.css";
 import { createRoot } from "react-dom/client";
-import LlmQueryBox from "@/components/LlmQueryBox";
+import ChatApp from "@/components/ChatApp";
 
 const root = createRoot(document.getElementById("root")!);
-root.render(<LlmQueryBox />);
+root.render(<ChatApp />);
