@@ -1,0 +1,12 @@
+TABLE chunks
+chunk_id: uuid (PRIMARY)
+user_id: uuid
+timestamp: timestamptz
+chunk_size: int4
+
+TABLE chat_messages
+message_id: uuid (PRIMARY)
+timestamp: timestamptz
+user_id: uuid
+content: text
+role: text

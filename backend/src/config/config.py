@@ -13,5 +13,10 @@ class Settings(BaseSettings):
     qdrant_api_key: str
     qdrant_url: str
 
+    supabase_url: str
+    supabase_password: str
+    supabase_key: str
+    supabase_service_role_key: str
+
 dotenv.load_dotenv(".env")
 settings = Settings() # type: ignore (fields provided by .env file)

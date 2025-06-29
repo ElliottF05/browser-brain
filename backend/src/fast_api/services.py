@@ -6,6 +6,7 @@ import time
 import ai.services
 import aws.services
 import qdrant.services
+import supabase_db.services
 from fast_api.models import Chunk, PageUpload, Query
 
 # service to orchestrate the entire process of handing an uploaded page

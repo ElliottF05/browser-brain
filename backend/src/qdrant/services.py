@@ -3,7 +3,7 @@ from qdrant_client import QdrantClient, models
 from fast_api.models import Chunk
 from config.config import settings
 
-# Qdrant client setup:
+# qdrant client setup:
     # PUT collections/chunks 
     # {
     #     "vectors": {
@@ -59,7 +59,8 @@ def query_chunks(embedding: list[float], user_id: str, limit: int = 10) -> tuple
                 )
             ]
         ),
-        limit=limit
+        limit=limit,
+        score_threshold=0.6, # TODO: look into this
     )
 
     chunk_ids = [str(point.id) for point in search_result]
