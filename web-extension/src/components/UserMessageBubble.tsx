@@ -8,10 +8,10 @@ const UserMessageBubble: React.FC<UserMessageBubbleProps> = ({ content }) => (
     <div className="w-full flex justify-end my-2">
         <div
             className={`
-                max-w-[80%] px-4 py-2
+                max-w-[80%] px-2 py-2
                 rounded-t-xl rounded-bl-xl
                 rounded-br-sm
-                bg-[var(--bb-user-bg-gradient)]
+                bg-[var(--bb-input-bg-gradient)]
                 text-white font-semibold
                 text-[12px]
                 break-words
@@ -21,7 +21,7 @@ const UserMessageBubble: React.FC<UserMessageBubbleProps> = ({ content }) => (
                 shadow-none
             `}
             style={{
-                background: "linear-gradient(100deg, #1e293b 0%, #3b82f6 100%)"
+                background: "linear-gradient(100deg, #232946 0%, #334155 100%)"
             }}
         >
             {content}
