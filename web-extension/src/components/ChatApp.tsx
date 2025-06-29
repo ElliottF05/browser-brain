@@ -68,27 +68,12 @@ const ChatApp: React.FC = () => {
             className={`
                 relative w-full h-full flex flex-col
                 rounded-2xl
-                shadow-bb-card
-                bg-gradient-to-br from-bb-bg via-[#232946] to-[#1a1a2e]
-                backdrop-blur-md
-                border border-[var(--bb-accent)]/5
                 overflow-hidden
                 font-sans
                 min-h-[400px] min-w-[300px]
+                bg-transparent
             `}
-            style={{
-                boxShadow:
-                    "0 4px 32px 0 #ffb30022, 0 1.5px 8px 0 rgba(0,0,0,0.25)",
-            }}
         >
-            <div
-                className="absolute inset-0 pointer-events-none z-0"
-                style={{
-                    background:
-                        "radial-gradient(ellipse at 80% 0%, #ffb30022 0%, transparent 70%), radial-gradient(ellipse at 20% 100%, #ff512f22 0%, transparent 70%)",
-                    filter: "blur(8px)",
-                }}
-            />
             <div className="relative z-10 flex flex-col h-full flex-1">
                 {/* <ChatHeader /> */}
                 <ChatHistory messages={messages} isAwaitingResponse={isAwaitingResponse} />

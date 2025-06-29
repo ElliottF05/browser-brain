@@ -4,7 +4,7 @@ html, body {
     height: 100%;
     width: 100%;
     font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
-    background: #181a1b; /* updated charcoal */
+    background: var(--bb-bg-gradient);
     color: #fff;
     overscroll-behavior: none;
 }
@@ -12,7 +12,6 @@ html, body {
 body {
     min-width: 300px;
     min-height: 400px;
-    background: linear-gradient(135deg, #181a1b 0%, #232946 60%, #1a1a2e 100%);
 }
 
 #root {
@@ -24,23 +23,25 @@ body {
 }
 
 :root {
-    --bb-bg: #181a1b;
-    --bb-bg-glass: rgba(36,39,42,0.85);
-    --bb-accent: #ffb300;
-    --bb-accent2: #ff512f;
-    --bb-user-gradient-from: #ff512f;
-    --bb-user-gradient-to: #f09819;
-    --bb-ai-bubble: rgba(255,255,255,0.08);
-    --bb-glass: rgba(255,255,255,0.08);
+    --bb-bg: #181c20;
+    /* Subtle blue in top right, no bright spot */
+    --bb-bg-gradient: radial-gradient(
+        circle at 100% 6%,
+        rgba(59,130,246,0.22) 0%,
+        #232946 14%,
+        #181c20 60%,
+        #181c20 100%
+    );
+    --bb-blue-accent: #3b82f6;
+    --bb-input-bg-gradient: linear-gradient(100deg, #232946 0%, #334155 100%);
+    --bb-user-bg-gradient: linear-gradient(100deg, #232946 0%, #3b82f6 100%);
 }
-
 /* Custom scrollbar for futuristic look */
 ::-webkit-scrollbar {
     width: 8px;
     background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-    background: #ffb30033; /* neon orange accent */
     border-radius: 8px;
 }
 
@@ -54,7 +55,7 @@ body {
 .markdown code, .markdown pre {
     font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
     background: #232946;
-    color: #ffb300;
+    color: #3b82f6;
     border-radius: 0.5rem;
     padding: 0.2em 0.4em;
 }

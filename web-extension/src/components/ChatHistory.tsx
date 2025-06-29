@@ -31,6 +31,7 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ messages, isAwaitingResponse 
                 rounded-2xl
                 scrollbar-thin scrollbar-thumb-[#232946] scrollbar-track-transparent
                 transition-all
+                bg-transparent
             `}
             style={{
                 minHeight: 0,

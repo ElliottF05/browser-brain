@@ -1,5 +1,4 @@
 import React from "react";
-import { Card } from "@/components/ui/card"; // ShadCN Card
 
 interface UserMessageBubbleProps {
     content: string;
@@ -7,22 +6,26 @@ interface UserMessageBubbleProps {
 
 const UserMessageBubble: React.FC<UserMessageBubbleProps> = ({ content }) => (
     <div className="w-full flex justify-end my-2">
-        <Card
+        <div
             className={`
-                max-w-[80%] px-4 py-2 rounded-xl
-                bg-gradient-to-r from-[var(--bb-user-gradient-from)] to-[var(--bb-user-gradient-to)]
+                max-w-[80%] px-4 py-2
+                rounded-t-xl rounded-bl-xl
+                rounded-br-sm
+                bg-[var(--bb-user-bg-gradient)]
                 text-white font-semibold
-                border border-[var(--bb-accent2)]/30
-                shadow-bb-glow
-                text-sm
-                animate-glow
+                text-[12px]
                 break-words
                 whitespace-pre-wrap
                 font-sans
+                transition-all
+                shadow-none
             `}
+            style={{
+                background: "linear-gradient(100deg, #1e293b 0%, #3b82f6 100%)"
+            }}
         >
             {content}
-        </Card>
+        </div>
     </div>
 );
 

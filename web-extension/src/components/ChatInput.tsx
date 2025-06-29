@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { SendHorizonal } from "lucide-react";
 
-const MAX_HEIGHT = 128; // px, about 4 lines
+const MAX_HEIGHT = 128;
 
 const ChatInput: React.FC<{ onSend?: (msg: string) => void }> = ({ onSend }) => {
     const [input, setInput] = useState("");
@@ -31,34 +31,27 @@ const ChatInput: React.FC<{ onSend?: (msg: string) => void }> = ({ onSend }) => 
         >
             <div
                 className={`
-                    relative flex items-end gap-2
+                    flex items-end gap-2
                     w-full max-w-xl
                     px-2 py-2
                     mb-4 mx-4
                     rounded-xl
-                    bg-gradient-to-r from-[var(--bb-user-gradient-from)]/70 to-[var(--bb-user-gradient-to)]/70
-                    border border-white/10
-                    focus-within:border-[var(--bb-accent)]/40
-                    shadow-bb-glow
+                    bg-[var(--bb-input-bg-gradient)]
                     transition-all
                     overflow-hidden
                 `}
-                style={{ backdropFilter: "blur(8px)" }}
+                style={{
+                    background: "linear-gradient(100deg, #1e293b 0%, #334155 100%)"
+                }}
             >
-                {/* Glass overlay for extra subtlety */}
-                <span
-                    className="absolute inset-0 rounded-xl bg-[var(--bb-bg-glass)] pointer-events-none"
-                    style={{ opacity: 0.85 }}
-                    aria-hidden="true"
-                />
                 <textarea
                     ref={textareaRef}
                     className={`
-                        relative z-10 flex-1 bg-transparent outline-none border-none resize-none
-                        text-white placeholder:text-[var(--bb-accent)]/60
+                        flex-1 bg-transparent outline-none border-none resize-none
+                        text-white placeholder:text-[var(--bb-blue-accent)]/60
                         px-2 py-1
                         font-sans
-                        text-sm
+                        text-[12px]
                         max-h-32
                         scrollbar-none
                         transition-all
@@ -76,17 +69,16 @@ const ChatInput: React.FC<{ onSend?: (msg: string) => void }> = ({ onSend }) => 
                 <button
                     type="submit"
                     className={`
-                        relative z-10 p-1 rounded-full
-                        bg-gradient-to-br from-[var(--bb-accent2)] to-[var(--bb-accent)]
-                        hover:from-[var(--bb-accent)] hover:to-[var(--bb-accent2)]
-                        shadow-bb-glow
+                        p-1 rounded-full
+                        bg-[var(--bb-blue-accent)]
+                        hover:bg-blue-400
                         transition-all
                         disabled:opacity-50
                     `}
                     disabled={!input.trim()}
                     title="Send"
                 >
-                    <SendHorizonal className="w-5 h-5 text-white" />
+                    <SendHorizonal className="w-4 h-4 text-white" />
                 </button>
             </div>
         </form>
