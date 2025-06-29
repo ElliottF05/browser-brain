@@ -47,7 +47,7 @@ const LlmQueryBox: React.FC = () => {
     };
 
     return (
-        <Card className="p-4">
+        <Card className="w-full h-full rounded-2xl shadow-none bg-white flex flex-col justify-between">
             <form onSubmit={handleSubmit} className="flex gap-2">
                 <Input
                     type="text"
@@ -63,7 +63,7 @@ const LlmQueryBox: React.FC = () => {
                     {loading ? "Loading..." : "Send"}
                 </Button>
             </form>
-            <CardContent className="mt-4 min-h-[2rem]">
+            <CardContent className="mt-4 min-h-[2rem] flex-1 overflow-auto">
                 {response && (
                     <div className="p-2 bg-gray-100 rounded">
                         <ReactMarkdown>{response}</ReactMarkdown>

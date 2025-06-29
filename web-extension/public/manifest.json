@@ -3,9 +3,7 @@
   "description": "sample description",
   "version": "1.0",
   "manifest_version": 3,
-  "action": {
-    "default_popup": "src/popup/popup.html"
-  },
+  "action": {},
   "background": {
     "service_worker": "src/background.js"
   },
@@ -15,5 +13,11 @@
       "js": ["src/content.js"]
     }
   ],
-  "permissions": ["storage", "scripting", "activeTab"]
+  "permissions": ["storage", "scripting", "activeTab"],
+  "web_accessible_resources": [
+    {
+      "resources": ["src/popup/popup.html"],
+      "matches": ["<all_urls>"]
+    }
+  ]
 }

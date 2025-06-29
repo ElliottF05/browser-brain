@@ -2,6 +2,8 @@ import { LRUCache } from 'lru-cache';
 
 import { SEND_TEXT_CHUNK, PAGE_UNLOAD, type ContentToBackgroundMessage } from './types';
 
+import './popup/injector'
+
 
 // ----- STATE MANAGEMENT -----
 
