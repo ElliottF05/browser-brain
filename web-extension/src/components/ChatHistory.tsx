@@ -18,7 +18,6 @@ interface ChatHistoryProps {
 const ChatHistory: React.FC<ChatHistoryProps> = ({ messages, isAwaitingResponse }) => {
     const scrollRef = useRef<HTMLDivElement>(null);
 
-    // Auto-scroll to bottom on new message
     useEffect(() => {
         scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
     }, [messages, isAwaitingResponse]);
@@ -28,9 +27,9 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ messages, isAwaitingResponse 
             ref={scrollRef}
             className={`
                 flex-1 overflow-y-auto px-4 py-6
-                bg-white/5 backdrop-blur-sm
                 space-y-2
-                scrollbar-thin scrollbar-thumb-cyan-700/40 scrollbar-track-transparent
+                rounded-2xl
+                scrollbar-thin scrollbar-thumb-[#232946] scrollbar-track-transparent
                 transition-all
             `}
             style={{

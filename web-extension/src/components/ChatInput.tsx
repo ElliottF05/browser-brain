@@ -1,9 +1,20 @@
-import React, { useState } from "react";
-import { SendHorizonal } from "lucide-react"; // Example icons
+import React, { useState, useRef, useEffect } from "react";
+import { SendHorizonal } from "lucide-react";
+
+const MAX_HEIGHT = 128; // px, about 4 lines
 
 const ChatInput: React.FC<{ onSend?: (msg: string) => void }> = ({ onSend }) => {
     const [input, setInput] = useState("");
-    
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+    useEffect(() => {
+        const textarea = textareaRef.current;
+        if (textarea) {
+            textarea.style.height = "auto";
+            textarea.style.height = Math.min(textarea.scrollHeight, MAX_HEIGHT) + "px";
+        }
+    }, [input]);
+
     const handleSend = (e?: React.FormEvent) => {
         e?.preventDefault();
         if (input.trim()) {
@@ -11,82 +22,75 @@ const ChatInput: React.FC<{ onSend?: (msg: string) => void }> = ({ onSend }) => 
             setInput("");
         }
     };
-    
+
     return (
         <form
-        onSubmit={handleSend}
-        className={`
-        w-full px-4 py-3
-        bg-white/5 backdrop-blur-md
-        border-t border-white/10
-        flex items-center gap-2
-        rounded-b-2xl
-        shadow-inner
-        z-20
-      `}
-            style={{
-                boxShadow: "0 2px 16px 0 rgba(0,255,255,0.08)",
-            }}
-            >
-            {/* Optional: Quick action button */}
-            {/* <button
-                type="button"
-                className="p-2 rounded-lg bg-gradient-to-br from-cyan-700/60 to-purple-700/60 hover:from-cyan-500 hover:to-purple-500 transition-all shadow-md"
-                title="Summarize"
-                tabIndex={-1}
-                >
-                <Sparkles className="w-5 h-5 text-cyan-200" />
-                </button> */}
-                {/* Input */}
-                <input
-                type="text"
+            onSubmit={handleSend}
+            className="w-full flex justify-center z-20"
+            autoComplete="off"
+        >
+            <div
                 className={`
-          flex-1 px-4 py-2 rounded-xl
-          bg-white/10 text-white
-          border border-cyan-400/20
-          focus:outline-none focus:ring-2 focus:ring-cyan-400/60
-          placeholder:text-cyan-200/60
-          font-sans
-          transition-all
-          shadow-sm
-        `}
-                    style={{
-                        backdropFilter: "blur(2px)",
-                    }}
-                    placeholder="Type your message..."
+                    relative flex items-end gap-2
+                    w-full max-w-xl
+                    px-2 py-2
+                    mb-4 mx-4
+                    rounded-xl
+                    bg-gradient-to-r from-[var(--bb-user-gradient-from)]/70 to-[var(--bb-user-gradient-to)]/70
+                    border border-white/10
+                    focus-within:border-[var(--bb-accent)]/40
+                    shadow-bb-glow
+                    transition-all
+                    overflow-hidden
+                `}
+                style={{ backdropFilter: "blur(8px)" }}
+            >
+                {/* Glass overlay for extra subtlety */}
+                <span
+                    className="absolute inset-0 rounded-xl bg-[var(--bb-bg-glass)] pointer-events-none"
+                    style={{ opacity: 0.85 }}
+                    aria-hidden="true"
+                />
+                <textarea
+                    ref={textareaRef}
+                    className={`
+                        relative z-10 flex-1 bg-transparent outline-none border-none resize-none
+                        text-white placeholder:text-[var(--bb-accent)]/60
+                        px-2 py-1
+                        font-sans
+                        text-sm
+                        max-h-32
+                        scrollbar-none
+                        transition-all
+                        min-h-[40px]
+                    `}
+                    placeholder="Type your message…"
                     value={input}
                     onChange={e => setInput(e.target.value)}
-                    autoComplete="off"
-                    />
-                    
-                    {/* Voice input (optional) */}
-                    {/* <button
-                        type="button"
-                        className="p-2 rounded-lg bg-gradient-to-br from-cyan-700/60 to-purple-700/60 hover:from-cyan-500 hover:to-purple-500 transition-all shadow-md"
-                        title="Voice input"
-                        tabIndex={-1}
-                        >
-                        <Mic className="w-5 h-5 text-cyan-200" />
-                        </button> */}
-                        
-                        {/* Send button */}
-                        <button
-                        type="submit"
-                        className={`
-          p-2 rounded-lg
-          bg-gradient-to-br from-cyan-500 to-blue-600
-          hover:from-cyan-400 hover:to-blue-500
-          shadow-lg
-          transition-all
-          disabled:opacity-50
-        `}
-                            disabled={!input.trim()}
-                            title="Send"
-                            >
-                            <SendHorizonal className="w-5 h-5 text-white" />
-                            </button>
-                            </form>
-                        );
-                    };
-                    
-                    export default ChatInput;
+                    rows={1}
+                    maxLength={1000}
+                    style={{
+                        overflowY: "auto",
+                    }}
+                />
+                <button
+                    type="submit"
+                    className={`
+                        relative z-10 p-1 rounded-full
+                        bg-gradient-to-br from-[var(--bb-accent2)] to-[var(--bb-accent)]
+                        hover:from-[var(--bb-accent)] hover:to-[var(--bb-accent2)]
+                        shadow-bb-glow
+                        transition-all
+                        disabled:opacity-50
+                    `}
+                    disabled={!input.trim()}
+                    title="Send"
+                >
+                    <SendHorizonal className="w-5 h-5 text-white" />
+                </button>
+            </div>
+        </form>
+    );
+};
+
+export default ChatInput;

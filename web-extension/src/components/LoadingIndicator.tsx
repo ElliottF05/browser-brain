@@ -6,15 +6,15 @@ const LoadingIndicator: React.FC = () => (
         <div
             className={`
                 flex items-center gap-2 px-4 py-1 rounded-lg
-                bg-cyan-900/30
-                border border-cyan-400/10
+                bg-[var(--bb-bg-glass)]
+                border border-[var(--bb-accent)]/20
                 backdrop-blur-sm
-                shadow
+                shadow-bb-glow
                 animate-fadein
             `}
         >
-            <Loader2 className="w-4 h-4 text-cyan-300 animate-spin" />
-            <span className="text-cyan-200 text-xs font-mono opacity-70">
+            <Loader2 className="w-4 h-4 text-[var(--bb-accent)] animate-spin" />
+            <span className="text-[var(--bb-accent)] text-xs font-mono opacity-80">
                 Awaiting response…
             </span>
         </div>

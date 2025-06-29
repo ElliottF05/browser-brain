@@ -22,7 +22,7 @@ const ChatApp: React.FC = () => {
                 },
                 body: JSON.stringify({
                     content: msg,
-                    user_id: "user123" // TODO: replace with actual user ID
+                    user_id: "user123"
                 })
             });
 
@@ -33,7 +33,6 @@ const ChatApp: React.FC = () => {
             let result = "";
             let aiMessageId = crypto.randomUUID();
 
-            // As soon as the first chunk is received, hide the loading indicator and show the AI message
             let firstChunk = true;
 
             while (true) {
@@ -66,17 +65,27 @@ const ChatApp: React.FC = () => {
 
     return (
         <div
-            className="relative w-full h-full flex flex-col rounded-2xl shadow-2xl bg-gradient-to-br from-[#181f2a] via-[#232946] to-[#1a1a2e] backdrop-blur-md border border-white/10 overflow-hidden font-sans min-h-[400px] min-w-[300px]"
+            className={`
+                relative w-full h-full flex flex-col
+                rounded-2xl
+                shadow-bb-card
+                bg-gradient-to-br from-bb-bg via-[#232946] to-[#1a1a2e]
+                backdrop-blur-md
+                border border-[var(--bb-accent)]/5
+                overflow-hidden
+                font-sans
+                min-h-[400px] min-w-[300px]
+            `}
             style={{
                 boxShadow:
-                    "0 4px 32px 0 rgba(0,255,255,0.10), 0 1.5px 8px 0 rgba(0,0,0,0.25)",
+                    "0 4px 32px 0 #ffb30022, 0 1.5px 8px 0 rgba(0,0,0,0.25)",
             }}
         >
             <div
                 className="absolute inset-0 pointer-events-none z-0"
                 style={{
                     background:
-                        "radial-gradient(ellipse at 80% 0%, rgba(0,255,255,0.10) 0%, transparent 70%), radial-gradient(ellipse at 20% 100%, rgba(128,0,255,0.10) 0%, transparent 70%)",
+                        "radial-gradient(ellipse at 80% 0%, #ffb30022 0%, transparent 70%), radial-gradient(ellipse at 20% 100%, #ff512f22 0%, transparent 70%)",
                     filter: "blur(8px)",
                 }}
             />
