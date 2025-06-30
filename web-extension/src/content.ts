@@ -1,4 +1,4 @@
-import { type TextChunkMessage, type PageUnloadMessage, SEND_TEXT_CHUNK, PAGE_UNLOAD } from './types';
+import { type TextChunkReceivedEvent, type PageUnloadEvent, TEXT_CHUNK_RECEIVED, PAGE_UNLOAD } from './types';
 
 console.log("Content script loaded");
 
@@ -65,8 +65,8 @@ function removeRedundantWhitespace(text: string): string {
 
 // send text chunks to the background script
 function sendTextChunkToBackground(text: string) {
-	const message: TextChunkMessage = {
-		type: SEND_TEXT_CHUNK,
+	const message: TextChunkReceivedEvent = {
+		type: TEXT_CHUNK_RECEIVED,
 		data: text,
 	};
 	chrome.runtime.sendMessage(message);
@@ -77,7 +77,7 @@ function sendTextChunkToBackground(text: string) {
 
 // notify background script on page unload (navigation, redirect, etc.)
 window.addEventListener('beforeunload', () => {
-	const message: PageUnloadMessage = {
+	const message: PageUnloadEvent = {
 		type: PAGE_UNLOAD,
 		url: window.location.href,
 	};

@@ -2,13 +2,7 @@ import React, { useRef, useEffect } from "react";
 import UserMessageBubble from "./UserMessageBubble";
 import AIMessageBlock from "./AIMessageBlock";
 import LoadingIndicator from "./LoadingIndicator";
-
-export type ChatMessage = {
-    id: string;
-    role: "user" | "ai";
-    content: string;
-    isTyping?: boolean;
-};
+import type { ChatMessage } from "@/types";
 
 interface ChatHistoryProps {
     messages: ChatMessage[];

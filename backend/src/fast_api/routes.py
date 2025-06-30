@@ -1,8 +1,9 @@
-from fastapi import APIRouter, BackgroundTasks
+from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 
 from fast_api.models import PageUpload, Query
 from fast_api.services import process_query_streaming, process_uploaded_page
+import supabase_db.services
 
 # create the router that will expose all api endpoints
 router = APIRouter()
@@ -25,3 +26,10 @@ def query_llm_streaming(query: Query):
         process_query_streaming(query),
         media_type="text/event-stream",
     )
+
+# endpoint to query supabase for chat messages
+@router.get("/chat/messages")
+def get_chat_messages(user_id: str, limit: int = 50):
+    return {
+        "messages": supabase_db.services.get_chat_messages(user_id, limit)
+    }

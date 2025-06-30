@@ -28,3 +28,7 @@ def upload_message(message: str, user_id: str, role: str):
         "role": role,
     }
     response = supabase_client.table("chat_messages").insert(json).execute()
+
+def get_chat_messages(user_id: str, limit: int = 50):
+    response = supabase_client.table("chat_messages").select("*").eq("user_id", user_id).order("timestamp", desc=True).limit(limit).execute()
+    return response.data
