@@ -1,6 +1,6 @@
 import { LRUCache } from 'lru-cache';
 
-import { SEND_TEXT_CHUNK, PAGE_UNLOAD, type ContentToBackgroundMessage } from './types';
+import { SEND_TEXT_CHUNK, PAGE_UNLOAD, type ContentToBackgroundMessage, SAMPLE_USER_ID } from './types';
 
 import './popup/injector'
 
@@ -57,7 +57,7 @@ async function processPageUnload(tabId: number, url: string) {
     const payload = {
         url: url,
         content: data.seenTextList,
-        user_id: 'user123' // TODO: replace with actual user ID
+        user_id: SAMPLE_USER_ID // TODO: replace with actual user ID
     }
 
     // TODO: replace with actual backend URL

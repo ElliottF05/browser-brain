@@ -60,7 +60,7 @@ def query_chunks(embedding: list[float], user_id: str, limit: int = 10) -> tuple
             ]
         ),
         limit=limit,
-        score_threshold=0.6, # TODO: look into this
+        score_threshold=0.0, # TODO: look into this
     )
 
     chunk_ids = [str(point.id) for point in search_result]

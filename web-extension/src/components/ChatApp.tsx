@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import ChatHeader from "./ChatHeader";
 import ChatHistory, { type ChatMessage } from "./ChatHistory";
 import ChatInput from "./ChatInput";
+import { SAMPLE_USER_ID } from "@/types";
 
 const ChatApp: React.FC = () => {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -22,7 +23,7 @@ const ChatApp: React.FC = () => {
                 },
                 body: JSON.stringify({
                     content: msg,
-                    user_id: "user123"
+                    user_id: SAMPLE_USER_ID // TODO: replace with real uuid
                 })
             });
 

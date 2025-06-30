@@ -37,6 +37,9 @@ def process_uploaded_page(page: PageUpload):
         # upload to s3
         aws.services.upload_chunk(chunk)
 
+        # upload to supabase
+        supabase_db.services.upload_chunk(chunk)
+
         # upload to qdrant
         qdrant.services.upload_chunk(chunk)
 
@@ -50,24 +53,10 @@ def process_uploaded_page(page: PageUpload):
 
     print(f"Successfully processed page ({len(futures)} chunks)")
 
-
-def process_query(query: Query):
-    # get the embedding for the query
-    embedding = ai.services.get_chunk_embedding_from_str(query.content)
-
-    # query qdrant for similar chunks
-    chunk_ids, chunk_urls = qdrant.services.query_chunks(embedding, query.user_id)
-
-    # download the chunks from s3
-    chunk_contents = aws.services.download_chunks_parallel(chunk_ids)
-
-    # use chunks as context for the query
-    llm_response = ai.services.query_llm(query.content, chunk_contents, chunk_urls)
-
-    print(f"LLM response returned. Used {len(chunk_contents)} results")
-    return llm_response
-
 def process_query_streaming(query: Query):
+    # upload the user message to supabase
+    supabase_db.services.upload_message(query.content, query.user_id, "user")
+
     # get the embedding for the query
     embedding = ai.services.get_chunk_embedding_from_str(query.content)
 
@@ -78,8 +67,17 @@ def process_query_streaming(query: Query):
     chunk_contents = aws.services.download_chunks_parallel(chunk_ids)
 
     # use chunks as context for the query
-    llm_response = ai.services.query_llm_streaming(query.content, chunk_contents, chunk_urls)
+    llm_response_iter = ai.services.query_llm_streaming(query.content, chunk_contents, chunk_urls)
+
+    # use a generator to stream the response
+    response_parts = []
+    for packet in llm_response_iter:
+        response_parts.append(packet)
+        yield packet
+    
+    # upload the full response to supabase
+    full_response = "".join(response_parts)
+    supabase_db.services.upload_message(full_response, query.user_id, "assistant")
 
     print(f"Streaming LLM response. Used {len(chunk_contents)} results")
-    return llm_response
 
