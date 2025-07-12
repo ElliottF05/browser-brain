@@ -13,46 +13,30 @@ from config.config import settings
 client = OpenAI(api_key=settings.openai_api_key)
 
 # helper to chunk text content into smaller pieces for embedding
-# input: list of strings (one string per html element)
+# input: string representing the content to be chunked
 # output: tuple containing list of tokenized chunks and list of original strings
-def chunk_text(content: list[str], chunk_size: int = 8191) -> tuple[list[list[int]], list[str]]:
+def chunk_text(content: str, chunk_size: int, overlap: int) -> tuple[list[list[int]], list[str]]:
 
     encoding = tiktoken.encoding_for_model("text-embedding-3-small")
-    tokens = [
-        encoding.encode(element, disallowed_special=()) 
-        for element in content if element.strip()
-        ] # dont include empty strings
+    all_tokens = encoding.encode(content, disallowed_special=())
 
-    chunks: list[list[int]] = []
-    current_chunk: list[int] = []
-    current_length = 0
+    chunks = []
+    strings = []
 
-    strings: list[str] = []
-    current_string: list[str] = []
+    i = 0
+    reached_end = False
+    while not reached_end:
+        current_chunk = all_tokens[i:i + chunk_size]
 
-    # build chunks of size <= chunk_size
-    for element, tokenized in zip(content, tokens):
-        if current_length + len(tokenized) > chunk_size:
-            chunks.append(current_chunk)
-            current_chunk = []
-            current_length = 0
-
-            strings.append("\n".join(current_string))
-            current_string = []
-        
-        if len(tokenized) > chunk_size:
-            print("WARNING: Element exceeds chunk size limit, truncating.")
-            tokenized = tokenized[:chunk_size]
-
-        current_chunk.extend(tokenized)
-        current_length += len(tokenized)
-        current_string.append(element)
-
-    if current_chunk:
         chunks.append(current_chunk)
-        strings.append("\n".join(current_string))
-    return chunks, strings
+        strings.append(encoding.decode(current_chunk))
 
+        if len(current_chunk) < chunk_size:
+            reached_end = True
+
+        i += chunk_size - overlap
+
+    return chunks, strings
 
 def get_chunk_embedding_from_tokens(tokens: list[int]) -> list[float]:
     response = client.embeddings.create(
@@ -68,16 +52,18 @@ def get_chunk_embedding_from_str(chunk: str) -> list[float]:
     )
     return response.data[0].embedding
 
+# creates a prompt for the LLM to answer a user's query based on their browsing history context.
 def create_query_prompt_messages(
         chunk_contents: list[str], 
         chunk_urls: list[str], 
+        chunk_timestamps: list[str],
         query: str
 ) -> Iterable[ChatCompletionMessageParam]:
 
     blocks = []
-    for content, url in zip(chunk_contents, chunk_urls):
+    for content, url, timestamp in zip(chunk_contents, chunk_urls, chunk_timestamps):
         blocks.append(
-            f"# ---START NEXT PAGE CONTENT---\nURL: {url}\n\n{content}\n# ---END PREVIOUS PAGE CONTENT---"
+            f"# ---START NEXT PAGE CONTENT---\nURL: {url}\nTimestamp: {timestamp}\n\n{content}\n# ---END PREVIOUS PAGE CONTENT---"
         )
     context_block = "\n\n".join(blocks)
 
@@ -97,51 +83,14 @@ def create_query_prompt_messages(
             role="user",
             content=(
                 f"Here is your browsing history context:\n\n{context_block}\n\n"
-                f"Now answer the following question:\n{query}"
+                f"Now, use this browsing history context to answer the following question:\n{query}"
             )
         )
     ]
     return messages
 
-def query_llm(query: str, chunk_contents: list[str], chunk_urls: list[str], max_tokens: int = 500) -> str:
-    messages = create_query_prompt_messages(chunk_contents, chunk_urls, query)
-    response = client.chat.completions.create(
-        model="gpt-4.1-mini",
-        messages=messages,
-        max_tokens=max_tokens,
-    )
-
-    if response.choices[0].message.content:
-        return response.choices[0].message.content.strip()
-    else:
-        raise ValueError("No content in response from LLM")
-    
-def query_llm_streaming(query: str, chunk_contents: list[str], chunk_urls: list[str], max_tokens: int = 500) -> Iterable[str]:
-    messages = create_query_prompt_messages(chunk_contents, chunk_urls, query)
-    response = client.chat.completions.create(
-        model="gpt-4.1-mini",
-        messages=messages,
-        max_tokens=max_tokens,
-        stream=True,
-    )
-
-    for chunk in response:
-        if chunk.choices[0].delta.content:
-            yield chunk.choices[0].delta.content
-
-def get_response(messages: Iterable[ChatCompletionMessageParam], max_tokens: int = 500) -> str:
-    response = client.chat.completions.create(
-        model="gpt-4.1-mini",
-        messages=messages,
-        max_tokens=max_tokens,
-    )
-
-    if response.choices[0].message.content:
-        return response.choices[0].message.content.strip()
-    else:
-        raise ValueError("No content in response from LLM")
-
-def get_response_streaming(messages: Iterable[ChatCompletionMessageParam], max_tokens: int = 500) -> Iterable[str]:
+def query_llm_streaming(query: str, chunk_contents: list[str], chunk_urls: list[str], chunk_timestamps: list[str], max_tokens: int = 1000) -> Iterable[str]:
+    messages = create_query_prompt_messages(chunk_contents, chunk_urls, chunk_timestamps, query)
     response = client.chat.completions.create(
         model="gpt-4.1-mini",
         messages=messages,

@@ -1,32 +1,31 @@
 from qdrant_client import QdrantClient, models
 
 from fast_api.models import Chunk
-from config.config import settings
 
-# qdrant client setup:
-    # PUT collections/chunks 
-    # {
-    #     "vectors": {
-    #       "size": 1536,
-    #       "distance": "Cosine"
-    #     }
-    # }
+'''
+qdrant client setup:
 
-    # PUT collections/chunks/index 
-    # {
-    #   "field_name": "user_id",
-    #   "field_schema": "keyword"
-    # }
+docker run -p 6333:6333 -p 6334:6334 \
+    -v "$(pwd)/qdrant_storage:/qdrant/storage:z" \
+    qdrant/qdrant
 
-    # PUT collections/chunks/index 
-    # {
-    #   "field_name": "timestamp",
-    #   "field_schema": "datetime"
-    # }
+PUT collections/chunks 
+{
+    "vectors": {
+        "size": 1536,
+        "distance": "Cosine"
+    }
+}
+
+PUT collections/chunks/index 
+{
+    "field_name": "timestamp",
+    "field_schema": "datetime"
+}
+'''
 
 qdrant_client = QdrantClient(
-    url=settings.qdrant_url,
-    api_key=settings.qdrant_api_key,
+    url="http://localhost:6333",
 )
 
 def upload_chunk(chunk: Chunk):
@@ -38,31 +37,23 @@ def upload_chunk(chunk: Chunk):
                 vector=chunk.embedding,
                 payload={
                     "content": chunk.content,
-                    "user_id": chunk.user_id,
                     "url": chunk.url,
-                    "timestamp": chunk.timestamp.isoformat(timespec="minutes").replace("+00:00", "Z")
+                    "timestamp": chunk.timestamp.isoformat()
                 },
             )
         ],
     )
 
-# returns a tuple of (chunk_ids, url's)
-def query_chunks(embedding: list[float], user_id: str, limit: int = 10) -> tuple[list[str], list[str]]:
+# returns a tuple of (chunk_contents, url's, timestamps)
+def query_chunks(embedding: list[float], limit: int = 10) -> tuple[list[str], list[str], list[str]]:
     search_result = qdrant_client.search(
         collection_name="chunks",
         query_vector=embedding,
-        query_filter=models.Filter(
-            must=[
-                models.FieldCondition(
-                    key="user_id",
-                    match=models.MatchValue(value=user_id)
-                )
-            ]
-        ),
         limit=limit,
         score_threshold=0.0, # TODO: look into this
     )
 
-    chunk_ids = [str(point.id) for point in search_result]
+    chunk_contents = [point.payload["content"] if point.payload else "No content available" for point in search_result]
     chunk_urls = [point.payload["url"] if point.payload else "No URL available" for point in search_result]
-    return chunk_ids, chunk_urls
+    chunk_timestamps = [point.payload["timestamp"] if point.payload else "No timestamp available" for point in search_result]
+    return chunk_contents, chunk_urls, chunk_timestamps

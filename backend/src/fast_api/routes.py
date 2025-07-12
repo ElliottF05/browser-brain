@@ -1,9 +1,8 @@
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 
-from fast_api.models import PageUpload, Query
+from fast_api.models import PageUpload, QueryRequest
 from fast_api.services import process_query_streaming, process_uploaded_page
-import supabase_db.services
 
 # create the router that will expose all api endpoints
 router = APIRouter()
@@ -21,9 +20,9 @@ def upload_page(page: PageUpload):
 
 # endpoint to query llm
 @router.post("/chat/query/stream")
-def query_llm_streaming(query: Query):
+def query_llm_streaming(query_request: QueryRequest):
     return StreamingResponse(
-        process_query_streaming(query),
+        process_query_streaming(query_request.query),
         media_type="text/event-stream",
     )
 
@@ -31,5 +30,5 @@ def query_llm_streaming(query: Query):
 @router.get("/chat/messages")
 def get_chat_messages(user_id: str, limit: int = 50):
     return {
-        "messages": supabase_db.services.get_chat_messages(user_id, limit)
+        "messages": []
     }

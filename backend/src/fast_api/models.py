@@ -11,9 +11,7 @@ class Chunk(BaseModel):
     embedding: list[float]
     chunk_id: str
     url: str
-    user_id: str
     timestamp: datetime
 
-class Query(BaseModel):
-    content: str
-    user_id: str
+class QueryRequest(BaseModel):
+    query: str

@@ -1,15 +1,10 @@
-# must import config before importing any other modules
-from config.config import settings
-
 from fastapi import FastAPI
 import uvicorn
 
 from fast_api.routes import router
 
-# create the global fastapi app
+# create the global fastapi app and include the router
 app = FastAPI()
-
-# include the api router in the app
 app.include_router(router)
 
 # run the app with uvicorn

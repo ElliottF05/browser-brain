@@ -56,8 +56,7 @@ const ChatApp: React.FC = () => {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    content: msg,
-                    user_id: SAMPLE_USER_ID // TODO: replace with real uuid
+                    query: msg
                 })
             });
 
