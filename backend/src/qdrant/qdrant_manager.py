@@ -16,6 +16,8 @@ def start_qdrant():
         home_dir = os.path.expanduser("~")
         storage_path = os.path.join(home_dir, "qdrant_storage")
 
+        os.makedirs(storage_path, exist_ok=True)
+
         _qdrant_proc = subprocess.Popen(
             [qdrant_path],
             cwd=storage_path,
