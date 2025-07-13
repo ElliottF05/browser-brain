@@ -1,6 +1,7 @@
 from qdrant_client import QdrantClient, models
 
 from fast_api.models import Chunk
+from qdrant.qdrant_manager import qdrant_client, initialize_qdrant_client
 
 '''
 qdrant client setup:
@@ -24,9 +25,8 @@ PUT collections/chunks/index
 }
 '''
 
-qdrant_client = QdrantClient(
-    url="http://localhost:6333",
-)
+# initialize the qdrant client before any service functions are called
+initialize_qdrant_client()
 
 def upload_chunk(chunk: Chunk):
     qdrant_client.upsert(
