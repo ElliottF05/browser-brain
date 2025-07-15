@@ -6,6 +6,8 @@ import time
 import ai.services
 import qdrant.services
 from fast_api.models import Chunk, PageUpload
+from chat_history.models import ChatMessage
+from chat_history.services import append_message
 
 # service to orchestrate the entire process of handing an uploaded page
 def process_uploaded_page(page: PageUpload):
@@ -60,6 +62,18 @@ def process_query_streaming(query: str):
         response_parts.append(packet)
         yield packet
 
+    # add query to chat history
+    append_message(ChatMessage(
+        role="user",
+        content=query
+    ))
+    
+    # add response to chat history
+    full_response = ''.join(response_parts)
+    append_message(ChatMessage(
+        role="assistant",
+        content=full_response
+    ))
 
     print(f"Streaming LLM response. Used {len(chunk_contents)} results")
 

@@ -1,7 +1,7 @@
-from qdrant_client import QdrantClient, models
+from qdrant_client import models
 
 from fast_api.models import Chunk
-from qdrant.qdrant_manager import qdrant_client, initialize_qdrant_client
+from qdrant.qdrant_manager import get_qdrant_client
 
 '''
 qdrant client setup:
@@ -25,10 +25,8 @@ PUT collections/chunks/index
 }
 '''
 
-# initialize the qdrant client before any service functions are called
-initialize_qdrant_client()
-
 def upload_chunk(chunk: Chunk):
+    qdrant_client = get_qdrant_client()
     qdrant_client.upsert(
         collection_name="chunks",
         points=[
@@ -46,6 +44,7 @@ def upload_chunk(chunk: Chunk):
 
 # returns a tuple of (chunk_contents, url's, timestamps)
 def query_chunks(embedding: list[float], limit: int = 10) -> tuple[list[str], list[str], list[str]]:
+    qdrant_client = get_qdrant_client()
     search_result = qdrant_client.search(
         collection_name="chunks",
         query_vector=embedding,

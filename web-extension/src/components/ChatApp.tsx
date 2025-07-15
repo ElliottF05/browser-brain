@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import ChatHeader from "./ChatHeader";
 import ChatHistory from "./ChatHistory";
 import ChatInput from "./ChatInput";
-import { BASE_URL, CHAT_HISTORY_UPDATE, CHAT_MESSAGE_RECEIVED, REQUEST_CHAT_HISTORY, SAMPLE_USER_ID, type ChatMessage } from "@/types";
+import { BASE_URL, CHAT_HISTORY_UPDATE, CHAT_MESSAGE_RECEIVED, REQUEST_CHAT_HISTORY, type ChatMessage } from "@/types";
 
 const ChatApp: React.FC = () => {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -32,7 +31,6 @@ const ChatApp: React.FC = () => {
     const handleSend = async (msg: string) => {
 
         const userMessage: ChatMessage = {
-            id: crypto.randomUUID(),
             role: "user",
             content: msg,
             isTyping: false
@@ -65,7 +63,6 @@ const ChatApp: React.FC = () => {
             const reader = res.body.getReader();
             const decoder = new TextDecoder();
             let result = "";
-            let aiMessageId = crypto.randomUUID();
 
             let firstChunk = true;
 
@@ -78,23 +75,20 @@ const ChatApp: React.FC = () => {
                     setIsAwaitingResponse(false);
                     setMessages((prev) => [
                         ...prev,
-                        { id: aiMessageId, role: "ai", content: result }
+                        { role: "assistant", content: result }
                     ]);
                     firstChunk = false;
                 } else {
                     setMessages((prev) =>
-                        prev.map((m) =>
-                            m.id === aiMessageId
-                                ? { ...m, content: result }
-                                : m
+                        prev.map((m,i) =>
+                            i === prev.length - 1 ? { ...m, content: result } : m
                         )
                     );
                 }
             }
 
             const aiMessage: ChatMessage = {
-                id: aiMessageId,
-                role: "ai",
+                role: "assistant",
                 content: result,
                 isTyping: false
             };

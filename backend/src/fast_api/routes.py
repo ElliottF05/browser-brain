@@ -3,6 +3,7 @@ from fastapi.responses import StreamingResponse
 
 from fast_api.models import PageUpload, QueryRequest
 from fast_api.services import process_query_streaming, process_uploaded_page
+from chat_history.services import read_messages
 
 # create the router that will expose all api endpoints
 router = APIRouter()
@@ -30,5 +31,5 @@ def query_llm_streaming(query_request: QueryRequest):
 @router.get("/chat/messages")
 def get_chat_messages(user_id: str, limit: int = 50):
     return {
-        "messages": []
+        "messages": read_messages()[-limit:],
     }

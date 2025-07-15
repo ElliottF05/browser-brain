@@ -140,7 +140,6 @@ async function getChatMessageHistory() {
     }
     const data = await response.json();
     const messages = data.messages.map((msg: any) => ({
-        id: msg.id,
         role: msg.role,
         content: msg.content,
     }))
