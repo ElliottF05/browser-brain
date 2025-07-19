@@ -1,6 +1,6 @@
 import { type TextChunkReceivedEvent, type PageUnloadEvent, TEXT_CHUNK_RECEIVED, PAGE_UNLOAD } from './types';
 
-console.log("Content script loaded");
+console.log("Browser Brain content script loaded");
 
 // ----- STATE -----
 // set to keep track of elements already seen and avoid adding duplicates
@@ -17,7 +17,7 @@ function handleIntersect(entries: IntersectionObserverEntry[]) {
 			if (text) {
 				sendTextChunkToBackground(text);
 				seenElements.add(entry.target);
-				console.log("Visible text added: ", text);
+				// console.log("Visible text added: ", text);
 			}
 		}
 	}
@@ -68,6 +68,7 @@ function sendTextChunkToBackground(text: string) {
 	const message: TextChunkReceivedEvent = {
 		type: TEXT_CHUNK_RECEIVED,
 		data: text,
+		url: window.location.href
 	};
 	chrome.runtime.sendMessage(message);
 }

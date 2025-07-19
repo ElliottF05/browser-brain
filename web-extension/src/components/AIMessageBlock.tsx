@@ -10,6 +10,17 @@ const AIMessageBlock: React.FC<AIMessageBlockProps> = ({ content }) => (
     <div className="w-full flex flex-col items-start my-2 text-[12px]">
         <ReactMarkdown
             components={{
+                a: ({ href, children, ...props }) => (
+                    <a
+                        href={href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        {...props}
+                        className="text-[var(--bb-blue-accent)] underline"
+                    >
+                        {children}
+                    </a>
+                ),
                 code: ({ children, className, ...props }) =>
                     className ? (
                         <pre className="bg-[#232946] p-3 rounded-lg overflow-x-auto my-2 text-xs font-mono text-[var(--bb-blue-accent)]">

@@ -1,8 +1,7 @@
 import os
 import sys
 import subprocess
-
-from config.config import settings
+import argparse
 
 PLIST_TEMPLATE = """<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -30,7 +29,7 @@ PLIST_TEMPLATE = """<?xml version="1.0" encoding="UTF-8"?>
 """
 
 def setup_launchd():
-    main_dir = settings.main_dir
+    main_dir = os.path.abspath(os.path.expanduser("~/.browser-brain"))
     if not os.path.exists(main_dir):
         os.makedirs(main_dir, exist_ok=True)
         print(f"Created main directory at {main_dir}")
@@ -58,11 +57,33 @@ def setup_launchd():
     print(f"Plist written to {plist_path}")
 
     # Unload the launch agent if it exists
-    subprocess.run(["launchctl", "unload", plist_path])
+    if os.path.exists(plist_path):
+        print("Unloading existing launch agent...")
+        try:
+            subprocess.run(
+                ["launchctl", "unload", plist_path],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                check=False
+            )
+        except Exception:
+            pass  # Silently ignore any errors
 
     # Load the launch agent
     subprocess.run(["launchctl", "load", plist_path])
-    print("Launch agent loaded. Your backend will now run on login.")
+    print("Launch agent loaded. The backend will now run on login.")
+
+def write_env_file(openai_api_key):
+    # Write .env file at ../.env relative to this script
+    env_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".env"))
+    with open(env_path, "w") as f:
+        f.write(f'OPENAI_API_KEY="{openai_api_key}"\n')
+    print(f".env file written to {env_path}")
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Setup backend and write .env file")
+    parser.add_argument("openai_api_key", help="Your OpenAI API key")
+    args = parser.parse_args()
+
+    write_env_file(args.openai_api_key)
     setup_launchd()

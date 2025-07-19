@@ -28,6 +28,7 @@ export type InstanceToBackgroundEvent = TextChunkReceivedEvent
 export interface TextChunkReceivedEvent {
     type: typeof TEXT_CHUNK_RECEIVED;
     data: string;
+    url: string;
 }
 export interface PageUnloadEvent {
     type: typeof PAGE_UNLOAD;

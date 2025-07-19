@@ -8,7 +8,7 @@ import './popup/injector'
 // ----- STATE MANAGEMENT -----
 
 // store text for each tab, use a set for deduplication
-const tabData = new Map<number, { seenTextSet: Set<string>, seenTextList: string[], opened_ts: number }>();
+const tabData = new Map<number, { seenTextList: string[], textSize: number, opened_ts: number }>();
 const globalSet = new LRUCache<string, string>({
     max: 10000, // maximum number of unique text chunks to store globally
     maxSize: 5000 * 1024, // maximum size of the cache, 5mb
@@ -21,7 +21,7 @@ let chatHistory: ChatMessage[] = [];
 // ----- EVENT PROCESSING -----
 
 // helper function to process received text chunks
-function processTextChunksReceived(tabId: number, text: string) {
+async function processTextChunksReceived(tabId: number, text: string, url: string) {
     console.log("Received text chunk in background from tab", tabId);
     if (globalSet.has(text)) {
         console.log("Text chunk already seen globally, skipping:", text);
@@ -29,16 +29,23 @@ function processTextChunksReceived(tabId: number, text: string) {
     }
     globalSet.set(text, text); // add to global set to avoid duplicates
     if (!tabData.has(tabId)) {
-        tabData.set(tabId, { seenTextSet: new Set(), seenTextList: [], opened_ts: Date.now() });
+        tabData.set(tabId, { seenTextList: [], textSize: 0, opened_ts: Date.now() });
     }
     const data = tabData.get(tabId)!;
-    if (!data.seenTextSet.has(text)) {
-        data.seenTextSet.add(text);
-        data.seenTextList.push(text);
+    data.seenTextList.push(text);
+    data.textSize += text.length;
+
+    if (data.textSize > 1024 * 8) {
+        console.log(`Tab ${tabId} has accumulated enough text data, uploading...`);
+        const dataToSend = data.seenTextList.slice();
+        data.seenTextList.length = 0;
+        data.textSize = 0;
+        await uploadPageData(url, dataToSend);
     }
 }
 
 async function processPageUnload(tabId: number, url: string) {
+    console.log("Processing page unload for url", url);
     const data = tabData.get(tabId);
     if (!data) {
         console.warn(`No data found for tab ${tabId} on unload, returning early.`);
@@ -56,26 +63,7 @@ async function processPageUnload(tabId: number, url: string) {
     console.log(`Page unloaded: ${url}`);
     
     // send collected data to backend
-    const payload = {
-        url: url,
-        content: data.seenTextList,
-        user_id: SAMPLE_USER_ID // TODO: replace with actual user ID
-    }
-
-    // TODO: replace with actual backend URL
-    const response = await fetch(`${BASE_URL}/pages/upload`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-    })
-    
-    if (!response.ok) {
-        console.error("Failed to upload page data:", response.statusText, response.status);
-    } else {
-        console.log("Page data uploaded successfully, response:", await response.json());
-    }
+    await uploadPageData(url, data.seenTextList);
 
     // delete tab data
     tabData.delete(tabId);
@@ -93,6 +81,32 @@ function processRequestChatHistory(sendResponse: (response: any) => void) {
 }
 
 
+// ----- BACKEND COMMUNICATION HELPERS -----
+
+async function uploadPageData(url: string, content: string[]) {
+    console.log("Uploading page data to backend");
+    const payload = {
+        url: url,
+        content: content,
+        user_id: SAMPLE_USER_ID // TODO: replace with actual user ID
+    };
+
+    const response = await fetch(`${BASE_URL}/pages/upload`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+        console.error("Failed to upload page data:", response.statusText, response.status);
+    } else {
+        console.log("Page data uploaded successfully, response:", await response.json());
+    }
+}
+
+
 // ----- REGISTER HANDLERS FOR INCOMING MESSAGES -----
 
 // add handler for incoming events
@@ -105,7 +119,7 @@ chrome.runtime.onMessage.addListener(
         }
         switch (message.type) {
             case TEXT_CHUNK_RECEIVED:
-                processTextChunksReceived(tabId, message.data);
+                processTextChunksReceived(tabId, message.data, message.url);
             break;
             case PAGE_UNLOAD:
                 processPageUnload(tabId, message.url);
@@ -126,12 +140,13 @@ chrome.runtime.onMessage.addListener(
 async function getChatMessageHistory() {
     console.log("Fetching chat message history from backend");
     const response = await fetch(
-        `${BASE_URL}/chat/messages?user_id=${SAMPLE_USER_ID}`,
+        `${BASE_URL}/chat/messages`,
         {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
-            }
+            },
+            cache: 'no-store'
         }
     );
     if (!response.ok) {
@@ -143,7 +158,6 @@ async function getChatMessageHistory() {
         role: msg.role,
         content: msg.content,
     }))
-    .reverse();
     return messages;
 }
 
@@ -164,6 +178,7 @@ function broadcastChatHistoryUpdate() {
 
 async function loadInitialChatHistory() {
     chatHistory = await getChatMessageHistory();
+    console.log(chatHistory);
     broadcastChatHistoryUpdate();
 }
 loadInitialChatHistory();

@@ -33,9 +33,9 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ messages, isAwaitingResponse 
         >
             {messages.map((msg) =>
                 msg.role === "user" ? (
-                    <UserMessageBubble key={msg.id} content={msg.content} />
+                    <UserMessageBubble content={msg.content} />
                 ) : (
-                    <AIMessageBlock key={msg.id} content={msg.content} />
+                    <AIMessageBlock content={msg.content} />
                 )
             )}
             {isAwaitingResponse && <LoadingIndicator />}

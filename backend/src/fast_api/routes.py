@@ -29,7 +29,7 @@ def query_llm_streaming(query_request: QueryRequest):
 
 # endpoint to query supabase for chat messages
 @router.get("/chat/messages")
-def get_chat_messages(user_id: str, limit: int = 50):
+def get_chat_messages(limit: int = 50):
     return {
         "messages": read_messages()[-limit:],
     }

@@ -26,4 +26,6 @@ def read_messages() -> list[ChatMessage]:
         with open(chat_file, "r", encoding="utf-8") as f:
             for line in f:
                 messages.append(ChatMessage.model_validate_json(line))
+        
+    print(f"Retrieved {len(messages)} messages: {messages}")
     return messages
