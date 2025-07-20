@@ -2,8 +2,12 @@
 
 Browser Brain is a **privacy-first** Chrome extension that records all the text content you encounter while browsing and lets you query your browsing history using natural language. Unlike most AI-powered tools that send your data to external servers, Browser Brain stores everything locally on your device: your browsing history is indexed in a local vector database (Qdrant) and all chat interactions are managed by a background process running on your machine. You can ask questions about anything you've read and get contextual responses with relevant URLs, powered by an LLM. The only data that ever leaves your device is your query to the OpenAI API, using your own API key.
 
-<img src="img/browser-brain1.png" alt="Browser Brain Screenshot 1" width="300">
-<img src="img/browser-brain2.png" alt="Browser Brain Screenshot 2" width="300">
+<table border="0">
+  <tr>
+    <td><img src="img/browser-brain1.png" alt="Browser Brain Screenshot 1" width="300"></td>
+    <td><img src="img/browser-brain2.png" alt="Browser Brain Screenshot 2" width="300"></td>
+  </tr>
+</table>
 
 ## Features
 
