@@ -1,17 +1,19 @@
 # Browser Brain
 
-Browser Brain is a Chrome extension and backend system that records all the text content you encounter while browsing. It stores this information in a vector database, allowing you to query your browsing history using natural language. The extension uses an LLM to interpret your queries and provide contextual responses, including relevant content and URLs from your history.
+Browser Brain is a **privacy-first** Chrome extension that records all the text content you encounter while browsing and lets you query your browsing history using natural language. Unlike most AI-powered tools that send your data to external servers, Browser Brain stores everything locally on your device: your browsing history is indexed in a local vector database (Qdrant) and all chat interactions are managed by a background process running on your machine. You can ask questions about anything you've read and get contextual responses with relevant URLs, powered by an LLM. The only data that ever leaves your device is your query to the OpenAI API, using your own API key.
 
-![Browser Brain Screenshot 1](img/browser-brain1.png)
-![Browser Brain Screenshot 2](img/browser-brain2.png)
+<img src="img/browser-brain1.png" alt="Browser Brain Screenshot 1" width="300">
+<img src="img/browser-brain2.png" alt="Browser Brain Screenshot 2" width="300">
 
 ## Features
 
+- **Privacy-first:** All browsing history, vector storage, and chat history are stored and processed locally—your sensitive data never leaves your device.
 - Automatically records and indexes text from every page you visit.
-- Stores your browsing history in a vector database for efficient retrieval.
+- Stores your browsing history in a local vector database (Qdrant) for efficient, private retrieval.
 - Lets you query your history using natural language in a chat interface.
 - Returns concise, context-aware answers with relevant sources and clickable links.
-- All chat history is synced and accessible in a single chat window.
+- All chat history is synced and accessible in a single chat window, managed locally.
+- The only external communication is to the OpenAI API, using your own API key—no other data is sent or shared.
 
 ## Technologies Used
 
